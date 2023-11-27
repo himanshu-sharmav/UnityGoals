@@ -54,7 +54,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'UnityGoals.urls'
-# AUTH_USER_MODEL="UnityGoals.Custom_User"
+AUTH_USER_MODEL="unitygoal.Custom_User"
 
 TEMPLATES = [
     {
