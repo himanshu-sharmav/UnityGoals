@@ -8,7 +8,7 @@ class Custom_User(AbstractUser):
 
 
 class NGOProfile(models.Model):
-    user=models.OneToOneField(Custom_User,on_delete=models.CASCADE)
+    user=models.OneToOneField(Custom_User,on_delete=models.CASCADE,related_name='ngoprofile')
     name = models.CharField(max_length=100)
     mission = models.TextField()
     # contact_email = models.EmailField() 
