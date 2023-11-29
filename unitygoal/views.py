@@ -70,7 +70,7 @@ def login_view(request):
                        "ngo_name": ngo.name,
                        "mission": ngo.mission,
                     #    "verification_document": str(verification_request.document_upload),
-                    #    "verification_status": verification_request.status,
+                       "verification_status": ngo.verification_status,
                    }
                    ngos_data.append(ngo_data)
                return JsonResponse(ngos_data, safe=False)
@@ -104,6 +104,25 @@ def logout_view(request):
         return JsonResponse({'message':'user logged out'})     
 
 
+
+def reject_verification(request, ap_id):
+    if request.method == 'POST':
+        if not request.user.is_superuser:
+            return JsonResponse({'message': 'Unauthorized'}, status=403)
+
+        verification_request = get_object_or_404(Verificationrequest, ngo_profile_id=ap_id, status='Pending')
+        ngo_profile = get_object_or_404(NGOProfile, pk=ap_id)
+
+        verification_request.status = 'Rejected'
+        verification_request.save()
+
+        ngo_profile.is_rejected = True
+        ngo_profile.save()
+
+        return JsonResponse({'message': 'Verification request rejected'}, status=200)
+    else:
+        return JsonResponse({'message': 'Invalid method'}, status=405)
+
 def  sdg_goal(request):
     
    if request.method=='POST': 
@@ -116,18 +135,19 @@ def  sdg_goal(request):
         description=description,
     )       
     sdgcreate.save()
+    return JsonResponse({'message':'Goal created'},status=200)
    else:
     return JsonResponse({'message': 'Wrong method'}, status=405) 
       
 def project_create(request):
     user = request.user
     if request.method=='POST':
-        data=json.loads(request.body)
-        title = data.get('title')
-        description = data.get('description')
-        location = data.get('location')
-        status = data.get('status')
-        sdgs = data.get('sdgs', [])
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        location = request.POST.get('location')
+        status = request.POST.get('status')
+        sdgs = request.POST.getlist('sdgs')
+        image = request.FILES.get('project_image')
         ngo=NGOProfile.objects.filter(user=user).first()
         new_project=Project.objects.create(
             ngo=ngo,
@@ -135,6 +155,7 @@ def project_create(request):
             description=description,
             location=location,
             status=status,
+            image=image
             # sdg=sdg
         )
         # new_project.save()
@@ -225,10 +246,11 @@ def verify_ngo(request):
 
 
 
-def approve_verification(request, ngo_id):
+def approve_verification(request,ngo_id):
     user = request.user
 
     if request.method == 'POST':
+        # ngo_id=request.GET.get('ap_id')
         if not user.is_superuser:
             return JsonResponse({'message': 'Unauthorized to approve verifications'}, status=403)
 

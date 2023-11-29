@@ -13,6 +13,7 @@ class NGOProfile(models.Model):
     mission = models.TextField()
     # contact_email = models.EmailField() 
     verification_status = models.BooleanField(default=False)
+    is_rejected=models.BooleanField(default=False)
 
 class Verificationrequest(models.Model):
     ngo_profile=models.OneToOneField(NGOProfile,on_delete=models.CASCADE)
@@ -31,6 +32,7 @@ class Project(models.Model):
     sdgs = models.ManyToManyField(SDG)
     location = models.CharField(max_length=100)
     status = models.CharField(max_length=20)
+    image=models.FileField(upload_to='project_pic/',null=True)
 
 
 class VolunteerApplication(models.Model):
