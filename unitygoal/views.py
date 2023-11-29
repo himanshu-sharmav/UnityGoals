@@ -141,14 +141,20 @@ def  sdg_goal(request):
       
 def project_create(request):
     user = request.user
+    if request.method=='GET':
+         sdgs = list(SDG.objects.all().values())
+         return JsonResponse({'sdgs':sdgs},safe=False)
     if request.method=='POST':
         title = request.POST.get('title')
         description = request.POST.get('description')
         location = request.POST.get('location')
         status = request.POST.get('status')
-        sdgs = request.POST.getlist('sdgs')
+        sdgs_input = request.POST.get('sdgs', '') 
         image = request.FILES.get('project_image')
+        if not all([title, description, location, status,image]):
+            return JsonResponse({'message': 'Please provide all required fields'}, status=400)
         ngo=NGOProfile.objects.filter(user=user).first()
+        sdg_ids = [int(sdg_id) for sdg_id in sdgs_input.split(',') if sdg_id.isdigit()]
         new_project=Project.objects.create(
             ngo=ngo,
             title=title,
@@ -159,8 +165,9 @@ def project_create(request):
             # sdg=sdg
         )
         # new_project.save()
-        sdg_objects=SDG.objects.filter(pk__in=sdgs)
-        new_project.sdgs.add(*sdg_objects)
+        sdgs = SDG.objects.filter(id__in=sdg_ids)
+        new_project.sdgs.set(sdgs)
+
         return JsonResponse({'message':'Project created successfully'})
     else:
         return JsonResponse({'message': 'Wrong method'}, status=405) 
