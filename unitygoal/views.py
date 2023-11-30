@@ -53,12 +53,13 @@ def register(request):
 def login_view(request):
        
        if request.method == 'GET':
-        user=request.user
-        if user.is_superuser:
+           user=request.user
+        # if user.is_superuser:
            try:
                all_ngos = NGOProfile.objects.all()
                ngos_data = []
                for ngo in all_ngos:
+                  if not ngo.is_rejected: 
                    ngo_user = Custom_User.objects.get(pk=ngo.user_id)
                 #    verification_request = Verificationrequest.objects.get(ngo_profile=ngo)
                    ngo_data = {
@@ -76,8 +77,8 @@ def login_view(request):
                return JsonResponse(ngos_data, safe=False)
            except (NGOProfile.DoesNotExist, Custom_User.DoesNotExist, Verificationrequest.DoesNotExist) as e:
                return JsonResponse({"message": "Error fetching NGO data"}, status=500)
-        else:
-            return JsonResponse({"message": "Unauthorized"}, status=403)
+        # else:
+        #     return JsonResponse({"message": "Unauthorized"}, status=403)
 
        if request.method=='POST': 
         data = json.loads(request.body)
@@ -143,7 +144,7 @@ def project_create(request):
     user = request.user
     if request.method=='GET':
          sdgs = list(SDG.objects.all().values())
-         return JsonResponse({'sdgs':sdgs},safe=False)
+         return JsonResponse(sdgs,safe=False)
     if request.method=='POST':
         title = request.POST.get('title')
         description = request.POST.get('description')
@@ -174,11 +175,29 @@ def project_create(request):
     
 def project_apply(request):
     user=request.user
+    if request.method == 'GET':
+        ngo_id = request.GET.get('ngo_id')
+        if ngo_id is not None:
+            ngo = get_object_or_404(NGOProfile, pk=ngo_id)
+            projects = Project.objects.filter(ngo=ngo).values()
+
+        #     project_data = []
+        #     for project in projects:
+        #         project_info = {
+        #     "id": project.id,
+        #     "title": project.title,
+        #     "description": project.description,
+        #     "image": list(project.image),
+        #     "location": project.location
+        # }
+        #         project_data.append(project_info)
+            data= list(projects)  
+            return JsonResponse(data,safe=False)
     if request.method=='POST':
         data = json.loads(request.body)
-        project_id = data.get('project_id')
-        status = data.get('status') 
-
+        project_id = data['project_id']
+        # status = data.get('status') 
+        
         project = Project.objects.filter(pk=project_id).first()
         volunteer = Custom_User.objects.filter(pk=user.id).first()
 
@@ -193,7 +212,7 @@ def project_apply(request):
         new_application = VolunteerApplication.objects.create(
             volunteer=volunteer,
             project=project,
-            status=status if status else 'Pending', 
+            # status=s, 
         )
 
         return JsonResponse({'message': 'Volunteer application submitted successfully'}, status=201)

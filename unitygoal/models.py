@@ -23,7 +23,7 @@ class Verificationrequest(models.Model):
 
 class SDG(models.Model):
     name = models.CharField(max_length=50)  
-    description=models.TextField()
+    # description=models.TextField()
 
 class Project(models.Model):
     title=models.CharField(max_length=150)
@@ -38,7 +38,7 @@ class Project(models.Model):
 class VolunteerApplication(models.Model):
     volunteer = models.ForeignKey(Custom_User, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    status = models.CharField(max_length=20)
+    status = models.CharField(max_length=20,null=True)
 
 class Donation(models.Model):
     donor_name=models.CharField(max_length=100)

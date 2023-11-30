@@ -1,7 +1,8 @@
 from django.urls import path
 from . import views
 from django.conf import settings
-
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns=[
     path('register',views.register,name='register'),
@@ -12,8 +13,9 @@ urlpatterns=[
     path('approve_verification/<int:ngo_id>',views.approve_verification,name='approve_verification'),
     path('reject_verification/<int:ap_id>',views.reject_verification,name='reject_verification'),
     path('project_create',views.project_create,name='project_create'),  
+    path('project_apply',views.project_apply,name='project_apply'),  
+
     
-
-
-
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
