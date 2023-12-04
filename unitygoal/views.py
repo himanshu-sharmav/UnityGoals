@@ -184,7 +184,7 @@ def project_apply(request):
         #     project_data = []
         #     for project in projects:
         #         project_info = {
-        #     "id": project.id,
+        #     "id": project.id,  
         #     "title": project.title,
         #     "description": project.description,
         #     "image": list(project.image),
@@ -294,6 +294,26 @@ def approve_verification(request,ngo_id):
     else:
         return JsonResponse({'message': 'Invalid method'}, status=405)
 
+def create_donation(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        donor_name = data.get('donor_name')
+        amount = data.get('amount')
+        project_id = data.get('project_id')
+        donation_date = data.get('donation_date')
 
+        try:
+            project = Project.objects.get(pk=project_id)
+            donation = Donation.objects.create(
+                donor_name=donor_name,
+                amount=amount,
+                project=project,
+                donation_date=donation_date
+            )
+            return JsonResponse({'message': 'Donation created successfully'}, status=201)
+        except Project.DoesNotExist:
+            return JsonResponse({'message': 'Project not found'}, status=404)
+    else:
+        return JsonResponse({'message': 'Invalid method'}, status=405)
 
     

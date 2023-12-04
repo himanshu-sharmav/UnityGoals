@@ -13,7 +13,9 @@ urlpatterns=[
     path('approve_verification/<int:ngo_id>',views.approve_verification,name='approve_verification'),
     path('reject_verification/<int:ap_id>',views.reject_verification,name='reject_verification'),
     path('project_create',views.project_create,name='project_create'),  
-    path('project_apply',views.project_apply,name='project_apply'),  
+    path('project_apply',views.project_apply,name='project_apply'), 
+    path('create_donation',views.create_donation,name='create_donation'),  
+
 
     
 ]
